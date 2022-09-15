@@ -1,0 +1,1 @@
+# Project with Blazor, EF, dotnet 6

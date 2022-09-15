@@ -1,0 +1,21 @@
+﻿-- get image
+docker pull mcr.microsoft.com/mssql/server:2022-latest
+
+-- create container and exposed
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=My@Passw0rd." \
+   -p 1433:1433 --name SqlServerOnDocker --hostname SqlServerOnDocker \
+   -d \
+   mcr.microsoft.com/mssql/server:2022-latest
+
+
+-- connect to the database (only powershell)
+docker exec -it SqlServerOnDocker /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P My@Passw0rd.
+
+-------------------------------------
+nuget package console
+-------------------------------------
+Add-Migration InitialCreate
+
+Update-Database
+
+Script-Migration

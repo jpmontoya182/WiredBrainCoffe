@@ -1,0 +1,65 @@
+﻿@page "/employees/list/{currentPage:int?}"
+
+
+@inject IDbContextFactory<EmployeeManagerDbContext> ContextFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Employess</PageTitle>
+
+<h1>Employess</h1>
+
+@if (employees is null)
+{
+    <div>Loading...</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <td>First Name</td>
+                <td>Last Name</td>
+                <td>Is a Developer</td>
+                <td>Department</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in employees)
+            {
+                <tr>
+                    <td>@employee.FirstName</td>
+                    <td>@employee.LastName</td>
+                    <td>@employee.IsDeveloper</td>
+                    <td>@employee.Department?.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private Employee[]? employees { get; set; }
+    private const int ItemsPerPage = 4;
+    [Parameter]
+    public int? CurrentPage { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (CurrentPage is null or < 1)
+        {
+            NavigationManager.NavigateTo("/employees/list/1");
+            return;
+        }
+        var itemsToSkip = (CurrentPage.Value - 1) * ItemsPerPage;
+
+        using var context = ContextFactory.CreateDbContext();
+
+        employees = await context.Employees
+        .Include(emp => emp.Department)
+        .OrderBy(emp => emp.FirstName)
+        .Skip(itemsToSkip)
+        .Take(ItemsPerPage)
+        .ToArrayAsync();
+    }
+}
